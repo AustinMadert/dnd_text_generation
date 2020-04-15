@@ -1,0 +1,8 @@
+
+rule dataset:
+    input:
+        'data/raw/monsters_complete_full.csv'
+    output:
+        'data/interim/monster_stats.txt'
+    script:
+        'src/data/make_dataset.py'
