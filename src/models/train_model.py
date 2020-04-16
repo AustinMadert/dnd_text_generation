@@ -3,27 +3,62 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 import pickle
 import tensorflow as tf
+from tensorflow.keras.layers import Embedding, GRU, Dropout, Dense, BatchNormalization
+from sacred import Experiment
+ex = Experiment()
 from text_generator import Keras_Text_Generator
 
 
-def main(input_filepath, output_filepath):
+def create_model(gen):
+
+    vocab_size = gen.vocab_size
+    embedding_dim = 400
+
+    gen.add_layer_to_model(Embedding, 
+                        input_dim=vocab_size, 
+                        output_dim=embedding_dim)
+    gen.add_layer_to_model(GRU,
+                        units=400,
+                        return_sequences=True,
+                        stateful=True,
+                        recurrent_initializer='glorot_uniform')
+    gen.add_layer_to_model(BatchNormalization)
+    gen.add_layer_to_model(Dropout,
+                        rate=0.1)
+    gen.add_layer_to_model(GRU,
+                        units=300,
+                        return_sequences=True,
+                        stateful=True,
+                        recurrent_initializer='glorot_uniform')
+    gen.add_layer_to_model(BatchNormalization)
+    gen.add_layer_to_model(Dropout,
+                        rate=0.1)
+    gen.add_layer_to_model(Dense,
+                        units=vocab_size)
+
+    gen.compile_model()
+
+    return gen
+
+
+@ex.main()
+def main(input_filepath=snakemake.input[0], 
+        output_filepath=snakemake.output[0]):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data...')
+    logger.info('Training model...')
 
     gen = Keras_Text_Generator()
 
-    data = gen.load_and_create_dataset(input_filepath, seq_length=300)
+    gen.load_and_create_dataset(input_filepath, from_pickle=input_filepath)
 
+    gen = create_model(gen)
 
-    # writer = tf.data.experimental.TFRecordWriter(output_filepath)
-    # writer.write(gen.dataset)
-    # with open(output_filepath, 'wb') as f:
-    #     pickle.dump(gen.dataset, f)  
+    gen.fit_model(epochs=2)
 
-    logger.info('Output file created!')
+    logger.info('Experiment complete!')
 
     return None
 
@@ -39,4 +74,4 @@ if __name__ == '__main__':
     # load up the .env entries as environment variables
     # load_dotenv(find_dotenv())
 
-    main(snakemake.input[0], snakemake.output.rs)
+    ex.run()
