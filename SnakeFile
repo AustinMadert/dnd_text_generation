@@ -1,8 +1,22 @@
 
-rule dataset:
+
+rule all:
+    input:
+        'data/interim/rolling_sequences.pkl'
+
+rule monster_string:
     input:
         'data/raw/monsters_complete_full.csv'
     output:
         'data/interim/monster_stats.txt'
     script:
         'src/data/make_dataset.py'
+
+rule dataset:
+    input:
+        'data/interim/monster_stats.txt'
+    output:
+        rs='data/interim/rolling_sequences.pkl',
+        # tfd='data/processed/abilities_dataset.tfrecord'
+    script:
+        'src/features/build_features.py'

@@ -69,7 +69,7 @@ class Keras_Text_Generator(object):
         # Use pickling flag to determine whether to load from previously created
         # sequences
         if self.from_pickle:
-            with open(self.from_pickle, 'rb') as f:
+            with open('rolling_sequences.pkl', 'rb') as f:
                 result = pickle.load(f)
             
             return result
@@ -127,8 +127,7 @@ class Keras_Text_Generator(object):
 
 
     def load_and_create_dataset(self, filename, seq_length=100, 
-            rolling_sequences=True, rolling_sequences_step=1, 
-            from_pickle=None,
+            rolling_sequences=True, rolling_sequences_step=1, from_pickle=False,
             return_raw=True):
         """Method designed to load a text file and create a training dataset. Data
         are loaded, then vectorized, and finally, the data is batched into training
