@@ -17,6 +17,15 @@ rule dataset:
         'data/interim/monster_stats.txt'
     output:
         rs='data/interim/rolling_sequences.pkl',
-        # tfd='data/processed/abilities_dataset.tfrecord'
     script:
         'src/features/build_features.py'
+
+rule train:
+    input:
+        rs='data/interim/rolling_sequences.pkl',
+        ms='data/interim/monster_stats.txt'
+
+    threads: 2
+
+    script:
+        'src/models/train_model.py'

@@ -69,11 +69,13 @@ class Keras_Text_Generator(object):
         # Use pickling flag to determine whether to load from previously created
         # sequences
         if self.from_pickle:
+            print('Opening pickled sequences...')
             with open(self.from_pickle, 'rb') as f:
                 result = pickle.load(f)
             
             return result
 
+        print('Generating new sequences...')
 
         dataX = []
         dataY = []

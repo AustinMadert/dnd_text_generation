@@ -41,9 +41,8 @@ def create_model(gen):
     return gen
 
 
-@ex.main()
-def main(input_filepath=snakemake.input[0], 
-        output_filepath=snakemake.output[0]):
+@ex.main
+def main(raw_data_path=snakemake.input.rs, text=snakemake.input.ms):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
@@ -52,7 +51,7 @@ def main(input_filepath=snakemake.input[0],
 
     gen = Keras_Text_Generator()
 
-    gen.load_and_create_dataset(input_filepath, from_pickle=input_filepath)
+    gen.load_and_create_dataset(text, from_pickle=raw_data_path)
 
     gen = create_model(gen)
 
